@@ -5,8 +5,11 @@ type Prefix string
 
 // Country code
 const (
-	PrefixCompany  Prefix = "Within company"
-	PrefixRegion   Prefix = "Within geografic region"
+	//
+	PrefixCompany Prefix = "Within company"
+	//
+	PrefixRegion Prefix = "Within geografic region"
+	//
 	PrefixReserved Prefix = "Reserved"
 
 	//
@@ -15,6 +18,8 @@ const (
 	PrefixISBN Prefix = "Bookland (ISBN)"
 	//
 	PrefixRefundReceipts Prefix = "Refund receipts"
+	//
+	PrefixCouponIdentification Prefix = "Coupon identification"
 
 	PrefixUSCanada            Prefix = "US, Canada"
 	PrefixUS                  Prefix = "US"
