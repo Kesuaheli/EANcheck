@@ -2,46 +2,47 @@ package gs1
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 )
 
 // ParseEAN13 takes n EAN13 code and parses it
-func ParseEAN13(code string) (prefix Prefix, rest string, err error) {
+func ParseEAN13(code string) (EAN13, error) {
+	ean := EAN13{Prefix: PrefixUnknown}
+
 	if len(code) != 13 {
-		return PrefixUnknown, "", fmt.Errorf("EAN13: code must have 13 digits")
+		return ean, fmt.Errorf("EAN13: code must have 13 digits")
 	}
 
 	if _, err := strconv.Atoi(code); err != nil {
-		return PrefixUnknown, "", fmt.Errorf("EAN13: code must only contain digits")
+		return ean, fmt.Errorf("EAN13: code must only contain digits")
 	}
 
-	parityIs := int(code[12] - '0')
-	code = code[:12]
-	parityExpected := CalcParity(code)
+	ean.Data = code[:12]
+	ean.Parity = int(code[12] - '0')
+	parityExpected := CalcParity(ean.Data)
 
-	if parityIs != parityExpected {
-		return PrefixUnknown, "", fmt.Errorf("EAN13: paraty isn't valid. Got %d, should %d. Is there a typo in the code?", parityIs, parityExpected)
+	if ean.Parity != parityExpected {
+		return ean, fmt.Errorf("EAN13: parity isn't valid. Got %d, should %d. Is there a typo in the code?", ean.Parity, parityExpected)
 	}
 
-	log.Printf("Parity is correct: %d", parityExpected)
-
-	if strings.HasPrefix(code, "0000000") {
-		return PrefixReserved, "", nil
+	if strings.HasPrefix(ean.Data, "0000000") {
+		ean.Prefix = PrefixReserved
+		return ean, fmt.Errorf("EAN13: code has reserved prefix, which is not valid for current usage")
 	}
 
-	threeDigit, err := strconv.Atoi(code[:3])
+	threeDigit, err := strconv.Atoi(ean.Data[:3])
 	if err != nil {
 		panic(err)
 	}
+	ean.Prefix = CountryCode(threeDigit)
+	ean.Data = ean.Data[3:]
 
-	rest = code[3:]
-	prefix = CountryCode(threeDigit)
-	if prefix == PrefixReserved || prefix == PrefixUSReserved {
-		rest = ""
+	if ean.Prefix == PrefixReserved || ean.Prefix == PrefixUSReserved {
+		return ean, fmt.Errorf("EAN13: code has reserved prefix, which is not valid for current usage")
 	}
-	return prefix, rest, nil
+
+	return ean, nil
 }
 
 // CountryCode takes a three digit integer and returns it Prefix.

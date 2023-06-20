@@ -3,6 +3,13 @@ package gs1
 // Prefix represents the country prefix of a number code
 type Prefix string
 
+// EAN13 represents an EAN13 code
+type EAN13 struct {
+	Prefix Prefix
+	Data   string
+	Parity int
+}
+
 // Country code
 const (
 	// Used to issue Restricted Circulation Numbers within a company

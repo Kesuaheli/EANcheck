@@ -42,11 +42,12 @@ func main() {
 
 	log.Printf("Code format is valid: %s\n", code)
 
-	prefix, rest, err := gs1.ParseEAN13(code)
+	ean13, err := gs1.ParseEAN13(code)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("Country: %s\n", prefix)
-	log.Printf("Rest:    %s\n", rest)
+	log.Printf("Country: %s\n", ean13.Prefix)
+	log.Printf("Product: %s\n", ean13.Data)
+	log.Printf("Parity:  %d\n", ean13.Parity)
 }
