@@ -1,14 +1,34 @@
 package gs1
 
 import (
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
 
 // ParseEAN13 takes n EAN13 code and parses it
-func ParseEAN13(code string) (prefix Prefix, rest string) {
+func ParseEAN13(code string) (prefix Prefix, rest string, err error) {
+	if len(code) != 13 {
+		return PrefixUnknown, "", fmt.Errorf("EAN13: code must have 13 digits")
+	}
+
+	if _, err := strconv.Atoi(code); err != nil {
+		return PrefixUnknown, "", fmt.Errorf("EAN13: code must only contain digits")
+	}
+
+	parityIs := int(code[12] - '0')
+	code = code[:12]
+	parityExpected := CalcParity(code)
+
+	if parityIs != parityExpected {
+		return PrefixUnknown, "", fmt.Errorf("EAN13: paraty isn't valid. Got %d, should %d. Is there a typo in the code?", parityIs, parityExpected)
+	}
+
+	log.Printf("Parity is correct: %d", parityExpected)
+
 	if strings.HasPrefix(code, "0000000") {
-		return PrefixReserved, ""
+		return PrefixReserved, "", nil
 	}
 
 	threeDigit, err := strconv.Atoi(code[:3])
@@ -21,7 +41,7 @@ func ParseEAN13(code string) (prefix Prefix, rest string) {
 	if prefix == PrefixReserved || prefix == PrefixUSReserved {
 		rest = ""
 	}
-	return prefix, rest
+	return prefix, rest, nil
 }
 
 // CountryCode takes a three digit integer and returns it Prefix.
@@ -312,5 +332,32 @@ func CountryCode(code int) Prefix {
 	case r(990, 999):
 		return PrefixCouponIdentification
 	}
+
+	// https://www.gs1.org/standards/id-keys/company-prefix => see Note 1
+	// "Prefixes not explicitly listed above are reserved by GS1 Global Office for future use"
 	return PrefixReserved
+}
+
+// CalcParity takes a GS1 code and calculates an returns its parity number.
+// This funtion only takes the actual data digits an not the last digit.
+//
+// Source: https://www.gs1.org/services/how-calculate-check-digit-manually
+func CalcParity(code string) (parity int) {
+	codeB := []byte(code)
+
+	//reverse slice
+	for i, j := 0, len(codeB)-1; i < j; i, j = i+1, j-1 {
+		codeB[i], codeB[j] = codeB[j], codeB[i]
+	}
+
+	// weighted checksum
+	for i, d := range codeB {
+		weight := (i+1)%2*2 + 1
+		parity += int(d-'0') * weight
+	}
+
+	// checksum to parity
+	parity = (10 - parity%10) % 10
+
+	return parity
 }

@@ -5,12 +5,16 @@ type Prefix string
 
 // Country code
 const (
-	//
+	// Used to issue Restricted Circulation Numbers within a company
 	PrefixCompany Prefix = "Within company"
-	//
+	// Used to issue Restricted Circulation Numbers within a geographic region
 	PrefixRegion Prefix = "Within geografic region"
-	//
+	// Reserved by GS1 Global Office for future use
 	PrefixReserved Prefix = "Reserved"
+	// Reserved by GS1 US for future use
+	PrefixUSReserved Prefix = "US, Reserved"
+	// Used when an parsing error occurs
+	PrefixUnknown Prefix = "Unknown"
 
 	//
 	PrefixISSN Prefix = "Serial publications (ISSN)"
@@ -23,7 +27,6 @@ const (
 
 	PrefixUSCanada            Prefix = "US, Canada"
 	PrefixUS                  Prefix = "US"
-	PrefixUSReserved          Prefix = "US, reserved for future use"
 	PrefixFrance              Prefix = "France"
 	PrefixBulgaria            Prefix = "Bulgaria"
 	PrefixSlovenija           Prefix = "Slovenija"

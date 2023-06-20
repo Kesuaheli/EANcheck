@@ -31,18 +31,21 @@ func main() {
 	code := flag.Arg(0)
 
 	if len(code) != 13 {
-		fmt.Printf("EAN code must be 13 digits!")
+		fmt.Printf("EAN code must be 13 digits!\n")
 		os.Exit(1)
 	}
 
 	if _, err := strconv.Atoi(code); err != nil {
-		fmt.Printf("EAN code must only contain digits!")
+		fmt.Printf("EAN code must only contain digits!\n")
 		os.Exit(1)
 	}
 
-	log.Printf("Code format is valid: %s", code)
+	log.Printf("Code format is valid: %s\n", code)
 
-	prefix, rest := gs1.ParseEAN13(code)
+	prefix, rest, err := gs1.ParseEAN13(code)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Printf("Country: %s\n", prefix)
 	log.Printf("Rest:    %s\n", rest)
