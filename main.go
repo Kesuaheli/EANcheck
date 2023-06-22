@@ -1,7 +1,7 @@
 package main
 
 import (
-	"eancheck/gs1"
+	"eancheck/ean"
 	"flag"
 	"fmt"
 	"log"
@@ -42,7 +42,7 @@ func main() {
 
 	log.Printf("Code format is valid: %s\n", code)
 
-	ean13, err := gs1.ParseEAN13(code)
+	ean13, err := ean.ParseEAN13(code)
 	if err != nil {
 		log.Fatal(err)
 	}
